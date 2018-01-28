@@ -20,8 +20,7 @@ impl GetCurrencies {
 pub struct Currency {
     id: String,
     name: String,
-    #[serde(deserialize_with = "deserialize_from_str")]
-    min_size: f64,
+    #[serde(deserialize_with = "deserialize_from_str")] min_size: f64,
 }
 
 impl EndPointRequest<Vec<Currency>> for GetCurrencies {
@@ -30,6 +29,7 @@ impl EndPointRequest<Vec<Currency>> for GetCurrencies {
             http_method: Method::Get,
             route: Route::new().add_segment(&"currencies"),
             body: String::new(),
+            pagination: None,
         }
     }
 }
@@ -49,6 +49,7 @@ mod tests {
             http_method: Method::Get,
             route: Route::new().add_segment(&"currencies"),
             body: String::new(),
+            pagination: None,
         };
 
         assert_eq!(result, expected);

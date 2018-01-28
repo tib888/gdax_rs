@@ -9,7 +9,7 @@ pub struct GetHistoricRates {
     // TODO: put as Option (as it is not required by the API)
     start: DateTime<Utc>,
     end: DateTime<Utc>,
-    granularity: i64,
+    granularity: u64,
 }
 
 impl GetHistoricRates {
@@ -17,7 +17,7 @@ impl GetHistoricRates {
         product_id: String,
         start: DateTime<Utc>,
         end: DateTime<Utc>,
-        granularity: i64,
+        granularity: u64,
     ) -> GetHistoricRates {
         GetHistoricRates {
             product_id,
@@ -30,7 +30,7 @@ impl GetHistoricRates {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Candle {
-    time: i64, // TODO: change it to Datetime??
+    time: u64, // TODO: change it to Datetime??
     low: f64,
     high: f64,
     open: f64,
@@ -50,6 +50,7 @@ impl EndPointRequest<Vec<Candle>> for GetHistoricRates {
                 .add_attribute_value(&"end", &self.end.naive_utc())
                 .add_attribute_value(&"granularity", &self.granularity),
             body: String::new(),
+            pagination: None,
         }
     }
 }
@@ -81,6 +82,7 @@ mod tests {
                 .add_attribute_value(&"end", &"2014-11-07 22:20:28.000001")
                 .add_attribute_value(&"granularity", &1),
             body: String::new(),
+            pagination: None,
         };
 
         assert_eq!(result, expected);

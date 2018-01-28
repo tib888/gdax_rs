@@ -18,8 +18,8 @@ impl GetTime {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Time {
-    iso: DateTime<Utc>,
-    epoch: f64,
+    pub iso: DateTime<Utc>,
+    pub epoch: f64,
 }
 
 impl EndPointRequest<Time> for GetTime {
@@ -28,6 +28,7 @@ impl EndPointRequest<Time> for GetTime {
             http_method: Method::Get,
             route: Route::new().add_segment(&"time"),
             body: String::new(),
+            pagination: None,
         }
     }
 }
@@ -48,6 +49,7 @@ mod tests {
             http_method: Method::Get,
             route: Route::new().add_segment(&"time"),
             body: String::new(),
+            pagination: None,
         };
 
         assert_eq!(result, expected);

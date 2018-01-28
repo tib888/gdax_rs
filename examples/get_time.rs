@@ -11,7 +11,7 @@ fn main() {
     let handle = core.handle();
 
     let mut test_client = RESTClient::default(&handle);
-    let products = core.run(test_client.send_request(&GetTime::new())).unwrap();
+    let time = core.run(test_client.send_request(&GetTime::new())).unwrap();
 
-    println!("{:?}", products);
+    println!("{:?}", time);
 }

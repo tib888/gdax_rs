@@ -13,7 +13,7 @@ fn main() {
     let mut test_client = RESTClient::default(&handle);
     let order_book = core.run(test_client.send_request(&GetProductOrderBook::new(
         String::from("BTC-USD"),
-        Level::Level2,
+        Level::Top50,
     ))).unwrap();
 
     println!("{:?}", order_book);

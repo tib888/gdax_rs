@@ -16,6 +16,7 @@
 
 extern crate chrono;
 extern crate futures;
+// #[macro_use]
 extern crate hyper;
 extern crate hyper_tls;
 extern crate itertools;
@@ -26,6 +27,7 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 extern crate tokio_core;
+extern crate uuid;
 
 pub mod products;
 pub mod currencies;
@@ -34,4 +36,4 @@ mod url;
 mod rest_client;
 mod error;
 mod serde_util;
-pub use rest_client::RESTClient;
+pub use rest_client::{Cursor, Pagination, RESTClient};

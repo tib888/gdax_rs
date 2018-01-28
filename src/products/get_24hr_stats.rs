@@ -16,12 +16,9 @@ impl Get24hrStats {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Stats {
-    #[serde(deserialize_with = "deserialize_from_str")]
-    open: f64,
-    #[serde(deserialize_with = "deserialize_from_str")]
-    high: f64,
-    #[serde(deserialize_with = "deserialize_from_str")]
-    volume: f64,
+    #[serde(deserialize_with = "deserialize_from_str")] open: f64,
+    #[serde(deserialize_with = "deserialize_from_str")] high: f64,
+    #[serde(deserialize_with = "deserialize_from_str")] volume: f64,
 }
 
 impl EndPointRequest<Stats> for Get24hrStats {
@@ -33,6 +30,7 @@ impl EndPointRequest<Stats> for Get24hrStats {
                 .add_segment(&self.product_id)
                 .add_segment(&"stats"),
             body: String::new(),
+            pagination: None,
         }
     }
 }
@@ -54,6 +52,7 @@ mod tests {
                 .add_segment(&"BTC-USD")
                 .add_segment(&"stats"),
             body: String::new(),
+            pagination: None,
         };
 
         assert_eq!(result, expected);

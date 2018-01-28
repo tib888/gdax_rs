@@ -11,9 +11,9 @@ fn main() {
     let handle = core.handle();
 
     let mut test_client = RESTClient::default(&handle);
-    let product_ticker = core.run(
-        test_client.send_request(&GetTrades::new(String::from("BTC-USD"))),
+    let product_trades = core.run(
+        test_client.send_request(&GetTrades::new(String::from("BTC-USD"), None)),
     ).unwrap();
 
-    println!("{:?}", product_ticker);
+    println!("{:?}", product_trades);
 }

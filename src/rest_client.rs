@@ -10,6 +10,7 @@ use futures::{Future, Stream};
 
 use url::Route;
 use error::RestError;
+// use hyper::header::Headers;
 
 const PUBLIC_API: &str = "https://api.gdax.com";
 const SANDBOX_API: &str = "https://api-public.sandbox.gdax.com";
@@ -19,6 +20,13 @@ pub struct RESTClient {
     api_url: String,
     client: Client<HttpsConnector<HttpConnector>, Body>,
 }
+
+// header! { (PaginationAfterHeader, "after") => [usize] }
+// header! { (PaginationBeforeHeader, "before") => [usize] }
+// header! { (PaginationLimitHeader, "limit") => [u32] }
+// header! { (PaginationAfterHeader, "CB-AFTER") => [usize] }
+// header! { (PaginationBeforeHeader, "CB-BEFORE") => [usize] }
+// header! { (PaginationLimitHeader, "CB-LIMIT") => [u32] }
 
 // TODO: remove all unwrap and handle error (error chain??)
 impl RESTClient {
@@ -51,9 +59,24 @@ impl RESTClient {
     ) -> Box<Future<Item = T, Error = hyper::Error> + 'static> {
         let request = request.create_request();
 
+        let opts = if let Some(pagination) = request.pagination {
+            let mut owned = match pagination.page {
+                Cursor::Before(before) => format!("?before={}", before),
+                Cursor::After(after) => format!("?after={}", after),
+            }.to_owned();
+
+            if let Some(limit) = pagination.limit {
+                owned.push_str(&format!("&limit={}", limit));
+            }
+
+            owned
+        } else {
+            String::new()
+        };
+
         // create the full request uri
         // TODO: remove unwrap
-        let uri: Uri = format!("{}{}", self.api_url, request.route.to_string())
+        let uri: Uri = format!("{}{}{}", self.api_url, request.route.to_string(), &opts)
             .parse()
             .unwrap();
 
@@ -61,6 +84,19 @@ impl RESTClient {
         let mut req = Request::new(request.http_method.clone(), uri);
         req.headers_mut()
             .set(ContentLength(request.body.len() as u64));
+
+        /*
+        if let Some(pagination) = request.pagination {
+            match pagination.page {
+                Cursor::Before(before) => req.headers_mut().set(PaginationBeforeHeader(before)),
+                Cursor::After(after) => req.headers_mut().set(PaginationAfterHeader(after))
+            };
+            if let Some(limit) = pagination.limit {
+                req.headers_mut().set(PaginationLimitHeader(limit));
+            }
+        }
+        */
+
         req.set_body(request.body.clone());
 
         // set the user agent (required by the API)
@@ -75,11 +111,24 @@ impl RESTClient {
     }
 }
 
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum Cursor {
+    Before(usize),
+    After(usize),
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub struct Pagination {
+    pub page: Cursor,
+    pub limit: Option<u32>,
+}
+
 #[derive(PartialEq, Debug)]
 pub struct RestRequest {
     pub http_method: Method,
     pub route: Route,
     pub body: String,
+    pub pagination: Option<Pagination>,
 }
 
 /// A struct that implement the trait `EndPointRequest` is capable of creating generate a
@@ -102,7 +151,7 @@ mod tests {
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     struct FakeAnswerType {
-        value: i64, // this value could be used to test
+        value: u64, // this value could be used to test
     }
 
     impl EndPointRequest<FakeAnswerType> for FakeRequestHandler {
@@ -111,6 +160,7 @@ mod tests {
                 http_method: Method::Get,
                 route: Route::new().add_segment(&"test"),
                 body: String::from(""),
+                pagination: None,
             }
         }
     }

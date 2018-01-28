@@ -11,9 +11,8 @@ fn main() {
     let handle = core.handle();
 
     let mut test_client = RESTClient::default(&handle);
-    let product_ticker = core.run(
-        test_client.send_request(&Get24hrStats::new(String::from("BTC-USD"))),
-    ).unwrap();
+    let day_stats = core.run(test_client.send_request(&Get24hrStats::new(String::from("BTC-USD"))))
+        .unwrap();
 
-    println!("{:?}", product_ticker);
+    println!("{:?}", day_stats);
 }

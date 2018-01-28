@@ -1,18 +1,21 @@
-// TODO : handle pagination
 use chrono::{DateTime, Utc};
 use hyper::Method;
 
 use serde_util::deserialize_from_str;
-use rest_client::{EndPointRequest, RestRequest};
+use rest_client::{EndPointRequest, Pagination, RestRequest};
 use url::Route;
 
 pub struct GetTrades {
     product_id: String,
+    pagination: Option<Pagination>,
 }
 
 impl GetTrades {
-    pub fn new(product_id: String) -> GetTrades {
-        GetTrades { product_id }
+    pub fn new(product_id: String, pagination: Option<Pagination>) -> GetTrades {
+        GetTrades {
+            product_id: product_id,
+            pagination: pagination,
+        }
     }
 }
 
@@ -24,13 +27,11 @@ pub enum Side {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Trade {
-    time: DateTime<Utc>,
-    trade_id: i64,
-    #[serde(deserialize_with = "deserialize_from_str")]
-    price: f64,
-    #[serde(deserialize_with = "deserialize_from_str")]
-    size: f64,
-    side: Side,
+    pub time: DateTime<Utc>,
+    pub trade_id: usize,
+    #[serde(deserialize_with = "deserialize_from_str")] pub price: f64,
+    #[serde(deserialize_with = "deserialize_from_str")] pub size: f64,
+    pub side: Side,
 }
 
 impl EndPointRequest<Vec<Trade>> for GetTrades {
@@ -42,6 +43,7 @@ impl EndPointRequest<Vec<Trade>> for GetTrades {
                 .add_segment(&self.product_id)
                 .add_segment(&"trades"),
             body: String::new(),
+            pagination: self.pagination.clone(),
         }
     }
 }
@@ -55,7 +57,7 @@ mod tests {
 
     #[test]
     fn test_create_request() {
-        let result = GetTrades::new(String::from("BTC-USD")).create_request();
+        let result = GetTrades::new(String::from("BTC-USD"), None).create_request();
         let expected = RestRequest {
             http_method: Method::Get,
             route: Route::new()
@@ -63,6 +65,7 @@ mod tests {
                 .add_segment(&"BTC-USD")
                 .add_segment(&"trades"),
             body: String::new(),
+            pagination: None,
         };
 
         assert_eq!(result, expected);

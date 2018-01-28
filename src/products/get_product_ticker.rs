@@ -20,18 +20,13 @@ impl GetProductTicker {
 ///
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Ticker {
-    trade_id: i64,
-    #[serde(deserialize_with = "deserialize_from_str")]
-    price: f64,
-    #[serde(deserialize_with = "deserialize_from_str")]
-    size: f64,
-    #[serde(deserialize_with = "deserialize_from_str")]
-    bid: f64,
-    #[serde(deserialize_with = "deserialize_from_str")]
-    ask: f64,
-    #[serde(deserialize_with = "deserialize_from_str")]
-    volume: f64,
-    time: DateTime<Utc>,
+    pub trade_id: usize,
+    #[serde(deserialize_with = "deserialize_from_str")] pub price: f64,
+    #[serde(deserialize_with = "deserialize_from_str")] pub size: f64,
+    #[serde(deserialize_with = "deserialize_from_str")] pub bid: f64,
+    #[serde(deserialize_with = "deserialize_from_str")] pub ask: f64,
+    #[serde(deserialize_with = "deserialize_from_str")] pub volume: f64,
+    pub time: DateTime<Utc>,
 }
 
 impl EndPointRequest<Ticker> for GetProductTicker {
@@ -43,6 +38,7 @@ impl EndPointRequest<Ticker> for GetProductTicker {
                 .add_segment(&self.product_id)
                 .add_segment(&"ticker"),
             body: String::new(),
+            pagination: None,
         }
     }
 }
@@ -65,6 +61,7 @@ mod tests {
                 .add_segment(&"BTC-USD")
                 .add_segment(&"ticker"),
             body: String::new(),
+            pagination: None,
         };
 
         assert_eq!(result, expected);
